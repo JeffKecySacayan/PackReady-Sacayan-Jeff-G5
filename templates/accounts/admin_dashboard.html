@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Admin · PackReady{% endblock %}
+{% block content %}
+<h2>Admin Dashboard</h2>
+<div class="row g-3">
+  <div class="col-md-4"><div class="card p-3"><h5>Total users</h5><p class="display-6 mb-0">{{ total_users }}</p></div></div>
+  <div class="col-md-4"><div class="card p-3"><h5>Travelers</h5><p class="display-6 mb-0">{{ total_travelers }}</p></div></div>
+  <div class="col-md-4"><div class="card p-3"><h5>Manage users</h5>
+    {% if user.is_staff %}<a href="{% url 'admin:accounts_user_changelist' %}">Open user list</a>
+    {% else %}<span class="text-muted">Staff access required</span>{% endif %}
+  </div></div>
+</div>
+{% endblock %}
