@@ -13,3 +13,9 @@ class CustomUserAdmin(UserAdmin):
         ("PackReady", {"fields": ("email", "role", "contact_number")}),
     )
     list_display = ("username", "email", "role", "is_staff")
+
+
+
+
+
+    
