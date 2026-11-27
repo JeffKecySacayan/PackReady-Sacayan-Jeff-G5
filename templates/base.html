@@ -7,16 +7,18 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body class="bg-light">
-<nav class="navbar navbar-expand navbar-dark bg-dark px-3">
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark px-3">
   <a class="navbar-brand" href="{% url 'accounts:dashboard' %}">🧳 PackReady</a>
-  <ul class="navbar-nav ms-auto align-items-center">
+  <ul class="navbar-nav ms-auto align-items-lg-center">
     {% if user.is_authenticated %}
       {% if user.role == 'admin' %}
         <li class="nav-item"><a class="nav-link" href="{% url 'accounts:admin_dashboard' %}">Admin Dashboard</a></li>
+        <li class="nav-item"><a class="nav-link" href="{% url 'packing:admin_list_index' %}">All Packing Lists</a></li>
       {% else %}
         <li class="nav-item"><a class="nav-link" href="{% url 'accounts:traveler_dashboard' %}">My Dashboard</a></li>
+        <li class="nav-item"><a class="nav-link" href="{% url 'packing:trip_list' %}">My Trips</a></li>
+        <li class="nav-item"><a class="nav-link" href="{% url 'packing:list_index' %}">My Packing Lists</a></li>
       {% endif %}
-      <li class="nav-item"><a class="nav-link" href="{% url 'packing:trip_list' %}">My Trips</a></li>
       <li class="nav-item"><a class="nav-link" href="{% url 'accounts:profile' %}">Profile</a></li>
       <li class="nav-item">
         <form method="post" action="{% url 'accounts:logout' %}" class="m-0">
