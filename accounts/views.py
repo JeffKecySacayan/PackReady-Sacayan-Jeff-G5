@@ -1,8 +1,12 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView
+from django.db.models import Count, Q
 from django.shortcuts import redirect, render
 from django.urls import reverse
+from django.utils import timezone
+
+from packing.models import PackingList, Trip
 
 from .decorators import role_required
 from .forms import LoginForm, ProfileForm, RegisterForm
@@ -49,16 +53,43 @@ def dashboard_redirect(request):
 
 @role_required(User.Role.ADMIN)
 def admin_dashboard(request):
+    recent_lists = (
+        PackingList.objects.select_related("user", "trip")
+        .annotate(
+            item_total=Count("items"),
+            item_packed=Count("items", filter=Q(items__is_packed=True)),
+        )[:5]
+    )
     context = {
         "total_users": User.objects.count(),
         "total_travelers": User.objects.filter(role=User.Role.TRAVELER).count(),
+        "total_trips": Trip.objects.count(),
+        "total_lists": PackingList.objects.count(),
+        "recent_lists": recent_lists,
     }
     return render(request, "accounts/admin_dashboard.html", context)
 
 
 @role_required(User.Role.TRAVELER)
 def traveler_dashboard(request):
-    return render(request, "accounts/traveler_dashboard.html")
+    my_lists = PackingList.objects.filter(user=request.user)
+    recent_lists = (
+        my_lists.select_related("trip")
+        .annotate(
+            item_total=Count("items"),
+            item_packed=Count("items", filter=Q(items__is_packed=True)),
+        )[:5]
+    )
+    upcoming_trips = Trip.objects.filter(
+        user=request.user, end_date__gte=timezone.localdate()
+    ).select_related("trip_type")[:5]
+    context = {
+        "trip_count": Trip.objects.filter(user=request.user).count(),
+        "list_count": my_lists.count(),
+        "recent_lists": recent_lists,
+        "upcoming_trips": upcoming_trips,
+    }
+    return render(request, "accounts/traveler_dashboard.html", context)
 
 
 @login_required

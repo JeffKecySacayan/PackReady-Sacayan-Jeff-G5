@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}My Packing Lists · PackReady{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2 class="h4 mb-0">My Packing Lists</h2>
+  <a href="{% url 'packing:list_create' %}" class="btn btn-dark">+ New list</a>
+</div>
+{% if lists %}
+<div class="row g-3">
+  {% for plist in lists %}
+  <div class="col-md-6 col-lg-4">
+    <div class="card shadow-sm h-100"><div class="card-body">
+      <h5 class="card-title mb-1">
+        <a href="{% url 'packing:list_detail' plist.pk %}" class="text-decoration-none">{{ plist.name }}</a>
+      </h5>
+      <p class="text-muted small mb-2">
+        {% if plist.trip %}{{ plist.trip.destination }} · {{ plist.trip.start_date|date:"M d, Y" }}{% else %}Not linked to a trip{% endif %}
+      </p>
+      <div class="progress mb-1" style="height:8px;">
+        <div class="progress-bar bg-success" style="width: {% widthratio plist.item_packed plist.item_total 100 %}%"></div>
+      </div>
+      <p class="small mb-3">{{ plist.item_packed }} of {{ plist.item_total }} packed</p>
+      <a href="{% url 'packing:list_detail' plist.pk %}" class="btn btn-sm btn-dark">Open</a>
+      <a href="{% url 'packing:list_edit' plist.pk %}" class="btn btn-sm btn-outline-secondary">Edit</a>
+      <a href="{% url 'packing:list_delete' plist.pk %}" class="btn btn-sm btn-outline-danger">Delete</a>
+    </div></div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="card p-4 text-center text-muted">
+  No packing lists yet. <a href="{% url 'packing:list_create' %}">Create your first list</a>.
+</div>
+{% endif %}
+{% endblock %}

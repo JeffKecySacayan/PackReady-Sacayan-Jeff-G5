@@ -3,9 +3,45 @@
 {% block content %}
 <h2>Welcome, {{ user.first_name|default:user.username }}! 🧳</h2>
 <p class="text-muted">Plan your trips and never forget an item again.</p>
-<div class="row g-3">
-  <div class="col-md-4"><div class="card p-3"><h5>My Trips</h5><p class="mb-0 text-muted">Coming soon</p></div></div>
-  <div class="col-md-4"><div class="card p-3"><h5>Packing Lists</h5><p class="mb-0 text-muted">Coming soon</p></div></div>
-  <div class="col-md-4"><div class="card p-3"><h5>My Profile</h5><a href="{% url 'accounts:profile' %}">View or edit</a></div></div>
+
+<div class="row g-3 mb-4">
+  <div class="col-md-4"><div class="card p-3"><h5>My Trips</h5>
+    <p class="display-6 mb-1">{{ trip_count }}</p><a href="{% url 'packing:trip_list' %}">Manage trips</a></div></div>
+  <div class="col-md-4"><div class="card p-3"><h5>Packing Lists</h5>
+    <p class="display-6 mb-1">{{ list_count }}</p><a href="{% url 'packing:list_index' %}">Manage lists</a></div></div>
+  <div class="col-md-4"><div class="card p-3"><h5>My Profile</h5>
+    <a href="{% url 'accounts:profile' %}">View or edit</a></div></div>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-7">
+    <div class="card shadow-sm"><div class="card-body">
+      <h5 class="mb-3">Recent packing lists</h5>
+      {% for plist in recent_lists %}
+        <div class="mb-3">
+          <div class="d-flex justify-content-between">
+            <a href="{% url 'packing:list_detail' plist.pk %}">{{ plist.name }}</a>
+            <small class="text-muted">{{ plist.item_packed }} of {{ plist.item_total }} packed</small>
+          </div>
+          <div class="progress" style="height:8px;">
+            <div class="progress-bar bg-success" style="width: {% widthratio plist.item_packed plist.item_total 100 %}%"></div>
+          </div>
+        </div>
+      {% empty %}
+        <p class="text-muted mb-0">No lists yet. <a href="{% url 'packing:list_create' %}">Create one</a>.</p>
+      {% endfor %}
+    </div></div>
+  </div>
+  <div class="col-lg-5">
+    <div class="card shadow-sm"><div class="card-body">
+      <h5 class="mb-3">Upcoming trips</h5>
+      {% for trip in upcoming_trips %}
+        <p class="mb-2"><strong>{{ trip.destination }}</strong> · {{ trip.trip_type.name }}<br>
+        <small class="text-muted">{{ trip.start_date|date:"M d, Y" }} – {{ trip.end_date|date:"M d, Y" }}</small></p>
+      {% empty %}
+        <p class="text-muted mb-0">No upcoming trips. <a href="{% url 'packing:trip_create' %}">Plan one</a>.</p>
+      {% endfor %}
+    </div></div>
+  </div>
 </div>
 {% endblock %}
