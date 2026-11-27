@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}{{ plist.name }} · PackReady{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-start mb-3">
+  <div>
+    <h2 class="h4 mb-1">{{ plist.name }}</h2>
+    <p class="text-muted mb-0">
+      {% if plist.trip %}{{ plist.trip.destination }} · {{ plist.trip.start_date|date:"M d, Y" }} – {{ plist.trip.end_date|date:"M d, Y" }}{% else %}Not linked to a trip{% endif %}
+      {% if not is_owner %} · Owner: {{ plist.user.get_full_name|default:plist.user.username }}{% endif %}
+    </p>
+  </div>
+  <div>
+    {% if is_owner %}
+      <a href="{% url 'packing:list_index' %}" class="btn btn-sm btn-outline-secondary">All lists</a>
+      <a href="{% url 'packing:list_edit' plist.pk %}" class="btn btn-sm btn-outline-secondary">Edit list</a>
+      <a href="{% url 'packing:list_delete' plist.pk %}" class="btn btn-sm btn-outline-danger">Delete list</a>
+    {% else %}
+      <a href="{% url 'accounts:dashboard' %}" class="btn btn-sm btn-outline-secondary">Back to dashboard</a>
+    {% endif %}
+  </div>
+</div>
+
+<div class="card shadow-sm mb-4"><div class="card-body">
+  <div class="d-flex justify-content-between">
+    <strong>Progress</strong><span>{{ packed }} of {{ total }} packed ({{ percent }}%)</span>
+  </div>
+  <div class="progress mt-2" style="height:12px;">
+    <div class="progress-bar bg-success" style="width: {{ percent }}%"></div>
+  </div>
+</div></div>
+
+<div class="row g-4">
+  <div class="{% if is_owner %}col-lg-8{% else %}col-12{% endif %}">
+    <div class="card shadow-sm">
+      <ul class="list-group list-group-flush">
+      {% for item in items %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+          <div class="{% if item.is_packed %}text-decoration-line-through text-muted{% endif %}">
+            {{ item.name }}
+            <span class="badge bg-secondary">x{{ item.quantity }}</span>
+            {% if item.category %}<span class="badge bg-light text-dark border">{{ item.category.name }}</span>{% endif %}
+          </div>
+          {% if is_owner %}
+          <div class="d-flex gap-1">
+            <form method="post" action="{% url 'packing:item_toggle' item.pk %}">
+              {% csrf_token %}
+              <button class="btn btn-sm {% if item.is_packed %}btn-success{% else %}btn-outline-success{% endif %}">
+                {% if item.is_packed %}Packed ✓{% else %}Mark packed{% endif %}
+              </button>
+            </form>
+            <a href="{% url 'packing:item_edit' item.pk %}" class="btn btn-sm btn-outline-secondary">Edit</a>
+            <form method="post" action="{% url 'packing:item_delete' item.pk %}" onsubmit="return confirm('Remove this item?');">
+              {% csrf_token %}
+              <button class="btn btn-sm btn-outline-danger">Remove</button>
+            </form>
+          </div>
+          {% else %}
+            <span class="badge {% if item.is_packed %}bg-success{% else %}bg-secondary{% endif %}">
+              {% if item.is_packed %}Packed{% else %}Not packed{% endif %}
+            </span>
+          {% endif %}
+        </li>
+      {% empty %}
+        <li class="list-group-item text-muted">No items yet.{% if is_owner %} Add your first item on the right.{% endif %}</li>
+      {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  {% if is_owner %}
+  <div class="col-lg-4">
+    <div class="card shadow-sm"><div class="card-body">
+      <h3 class="h6 mb-3">Add an item</h3>
+      <form method="post" novalidate>
+        {% csrf_token %}
+        {% include "accounts/_form_fields.html" %}
+        <button class="btn btn-dark w-100">Add item</button>
+      </form>
+    </div></div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
